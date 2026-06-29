@@ -2,6 +2,7 @@ import Assignments from "@/components/widgets/Assignments";
 import CollegeTracker from "@/components/widgets/CollegeTracker";
 import ActionInbox from "@/components/widgets/ActionInbox";
 import TaskChecklist from "@/components/widgets/TaskChecklist";
+import Grades from "@/components/widgets/Grades";
 
 export default function SchoolWorkspace() {
   return (
@@ -13,7 +14,12 @@ export default function SchoolWorkspace() {
       height: "100%",
     }}>
       <Assignments style={{ height: "100%" }} />
-      <CollegeTracker style={{ height: "100%" }} />
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
+        <Grades style={{ flex: 1 }} />
+        <CollegeTracker style={{ flex: 1 }} />
+      </div>
+
       <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
         <TaskChecklist style={{ flex: 1 }} />
         <ActionInbox label="School Inbox" style={{ flex: "0 0 auto" }} />
