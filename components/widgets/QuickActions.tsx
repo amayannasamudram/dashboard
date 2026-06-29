@@ -1,40 +1,61 @@
 "use client";
 
+import React from "react";
 import Widget from "./Widget";
 
-interface Action {
+interface Link {
   label: string;
   href: string;
-  icon: string;
-  color: string;
+  key: string;
 }
 
-const ACTIONS: Action[] = [
-  { label: "GitHub", href: "https://github.com", icon: "⬡", color: "#e0e0e0" },
-  { label: "Gmail", href: "https://mail.google.com", icon: "◉", color: "#ea4335" },
-  { label: "Linear", href: "https://linear.app", icon: "◈", color: "#5e6ad2" },
-  { label: "Vercel", href: "https://vercel.com", icon: "▲", color: "#e0e0e0" },
-  { label: "Figma", href: "https://figma.com", icon: "◎", color: "#a855f7" },
-  { label: "Notion", href: "https://notion.so", icon: "▣", color: "#e0e0e0" },
+const LINKS: Link[] = [
+  { label: "GitHub",  href: "https://github.com",         key: "GH" },
+  { label: "Gmail",   href: "https://mail.google.com",    key: "GM" },
+  { label: "Linear",  href: "https://linear.app",         key: "LN" },
+  { label: "Vercel",  href: "https://vercel.com",         key: "VR" },
+  { label: "Figma",   href: "https://figma.com",          key: "FG" },
+  { label: "Notion",  href: "https://notion.so",          key: "NT" },
 ];
 
-export default function QuickActions() {
+export default function QuickActions({ style }: { style?: React.CSSProperties }) {
   return (
-    <Widget title="Quick Access">
-      <div className="grid grid-cols-3 gap-2">
-        {ACTIONS.map(a => (
+    <Widget title="Quick Access" style={style}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
+        {LINKS.map(l => (
           <a
-            key={a.label}
-            href={a.href}
+            key={l.label}
+            href={l.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-md transition-all"
-            style={{ background: "#0d0d0d", border: "1px solid #1a1a1a", textDecoration: "none" }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "#2a2a2a"; e.currentTarget.style.background = "#141414"; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = "#1a1a1a"; e.currentTarget.style.background = "#0d0d0d"; }}
+            className="interactive"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 4,
+              padding: "10px 6px",
+              background: "var(--surface-raised)",
+              border: "1px solid var(--border-subtle)",
+              borderRadius: "var(--radius)",
+              textDecoration: "none",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = "var(--border)";
+              e.currentTarget.style.background = "oklch(0.18 0 0)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = "var(--border-subtle)";
+              e.currentTarget.style.background = "var(--surface-raised)";
+            }}
           >
-            <span style={{ color: a.color, fontSize: 16 }}>{a.icon}</span>
-            <span className="text-xs" style={{ color: "#555" }}>{a.label}</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, color: "var(--ink-2)", letterSpacing: "0.05em" }}>
+              {l.key}
+            </span>
+            <span style={{ fontSize: 10, color: "var(--ink-3)" }}>
+              {l.label}
+            </span>
           </a>
         ))}
       </div>

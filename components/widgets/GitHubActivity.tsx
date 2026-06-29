@@ -1,38 +1,55 @@
 "use client";
 
+import React from "react";
 import Widget from "./Widget";
 
 const MOCK = [
-  { repo: "amayannasamudram/dashboard", event: "push", branch: "main", message: "Initial PiOS setup", time: "just now" },
-  { repo: "amayannasamudram/dashboard", event: "push", branch: "main", message: "Add deploy script", time: "2h ago" },
+  { repo: "dashboard", branch: "main", message: "Initial PiOS — Projects + School workspaces", time: "just now", sha: "f1d8e27" },
+  { repo: "dashboard", branch: "main", message: "Add deploy script and cron job", time: "2h ago", sha: "a3c9b12" },
 ];
 
-export default function GitHubActivity() {
+export default function GitHubActivity({ style }: { style?: React.CSSProperties }) {
   return (
-    <Widget title="GitHub" badge="live" badgeColor="#22c55e">
-      <div className="flex flex-col gap-2">
+    <Widget title="GitHub" badge="live" badgeColor="green" style={style}>
+      <div style={{ display: "flex", flexDirection: "column" }}>
         {MOCK.map((e, i) => (
-          <div key={i} className="flex items-start gap-3 py-2" style={{ borderBottom: "1px solid #161616" }}>
-            <div className="shrink-0 mt-1">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#22c55e" }} />
+          <div
+            key={i}
+            className="interactive"
+            style={{
+              display: "flex",
+              gap: 10,
+              padding: "7px 6px",
+              borderRadius: "var(--radius-sm)",
+              borderBottom: i < MOCK.length - 1 ? "1px solid var(--border-subtle)" : "none",
+            }}
+            onMouseEnter={el => (el.currentTarget.style.background = "var(--surface-raised)")}
+            onMouseLeave={el => (el.currentTarget.style.background = "transparent")}
+          >
+            <div style={{ paddingTop: 4, flexShrink: 0 }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--green)" }} />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium truncate" style={{ color: "#e0e0e0", fontFamily: "monospace" }}>
-                  {e.repo.split("/")[1]}
-                </span>
-                <span className="text-xs px-1 rounded shrink-0" style={{ background: "#1a2a1a", color: "#22c55e", fontSize: 10 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {e.message}
+              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--ink-2)" }}>{e.repo}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, padding: "0 4px", background: "var(--green-bg)", color: "var(--green)", borderRadius: "var(--radius-sm)" }}>
                   {e.branch}
                 </span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--ink-3)" }}>{e.sha}</span>
               </div>
-              <p className="text-xs mt-0.5 truncate" style={{ color: "#555" }}>{e.message}</p>
             </div>
-            <span className="text-xs shrink-0" style={{ color: "#333", fontFamily: "monospace" }}>{e.time}</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--ink-3)", flexShrink: 0, paddingTop: 1 }}>{e.time}</span>
           </div>
         ))}
-        <p className="text-xs mt-1" style={{ color: "#333" }}>
-          Connect GitHub token in settings to see live activity
-        </p>
+
+        <div style={{ marginTop: 10, padding: "6px 6px" }}>
+          <p style={{ fontSize: 11, color: "var(--ink-3)", fontFamily: "var(--font-mono)" }}>
+            → add GITHUB_TOKEN env var for live feed
+          </p>
+        </div>
       </div>
     </Widget>
   );

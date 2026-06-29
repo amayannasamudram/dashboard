@@ -15,56 +15,81 @@ export default function PiOS() {
     return () => clearInterval(t);
   }, []);
 
-  const fmt = (d: Date) =>
+  const fmtTime = (d: Date) =>
     d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 
   const fmtDate = (d: Date) =>
     d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: "#080808" }}>
-      {/* Menubar */}
-      <div
-        className="flex items-center justify-between px-5 shrink-0"
-        style={{ height: 40, background: "#0d0d0d", borderBottom: "1px solid #1c1c1c" }}
-      >
-        <div className="flex items-center gap-6">
-          <span className="text-xs font-semibold" style={{ color: "#3b82f6", letterSpacing: "0.2em" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: "var(--bg)" }}>
+
+      {/* ── Menubar ── */}
+      <header style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        height: 36,
+        padding: "0 14px",
+        background: "var(--surface)",
+        borderBottom: "1px solid var(--border-subtle)",
+        flexShrink: 0,
+      }}>
+
+        {/* Left: wordmark + nav */}
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <span style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            fontWeight: 600,
+            color: "var(--primary)",
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+          }}>
             PiOS
           </span>
-          <div className="flex items-center gap-1">
+
+          <nav style={{ display: "flex", alignItems: "center", gap: 2 }}>
             {(["projects", "school"] as Workspace[]).map((w) => (
               <button
                 key={w}
                 onClick={() => setWorkspace(w)}
-                className="px-3 py-1 text-xs rounded transition-all"
+                className="interactive"
                 style={{
-                  background: workspace === w ? "#1e1e1e" : "transparent",
-                  color: workspace === w ? "#e8e8e8" : "#555",
-                  border: workspace === w ? "1px solid #2a2a2a" : "1px solid transparent",
+                  padding: "3px 10px",
+                  fontSize: 12,
                   fontWeight: workspace === w ? 500 : 400,
+                  color: workspace === w ? "var(--ink)" : "var(--ink-2)",
+                  background: workspace === w ? "var(--surface-raised)" : "transparent",
+                  border: workspace === w ? "1px solid var(--border)" : "1px solid transparent",
+                  borderRadius: "var(--radius)",
+                  cursor: "pointer",
                   textTransform: "capitalize",
+                  letterSpacing: "0.01em",
                 }}
               >
                 {w}
               </button>
             ))}
-          </div>
+          </nav>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-xs" style={{ color: "#444", fontFamily: "monospace" }}>
+
+        {/* Right: date + time */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-3)" }}>
             {fmtDate(time)}
           </span>
-          <span className="text-xs" style={{ color: "#666", fontFamily: "monospace" }}>
-            {fmt(time)}
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-2)", fontWeight: 500 }}>
+            {fmtTime(time)}
           </span>
         </div>
-      </div>
+      </header>
 
-      {/* Workspace */}
-      <div className="flex-1 overflow-hidden">
+      {/* ── Workspace ── */}
+      <main style={{ flex: 1, overflow: "hidden" }}>
         {workspace === "projects" ? <ProjectsWorkspace /> : <SchoolWorkspace />}
-      </div>
+      </main>
+
     </div>
   );
 }

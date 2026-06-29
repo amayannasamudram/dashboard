@@ -6,23 +6,26 @@ import ActionInbox from "@/components/widgets/ActionInbox";
 
 export default function ProjectsWorkspace() {
   return (
-    <div className="h-full p-4 grid gap-4" style={{
+    <div style={{
+      display: "grid",
       gridTemplateColumns: "1fr 1fr 1fr",
-      gridTemplateRows: "1fr 1fr",
+      gap: 10,
+      padding: 10,
+      height: "100%",
     }}>
-      {/* Col 1 */}
-      <ActiveProjects />
+      {/* Col 1: Projects (full height) */}
+      <ActiveProjects style={{ height: "100%" }} />
 
-      {/* Col 2 */}
-      <div className="flex flex-col gap-4">
-        <GitHubActivity />
-        <QuickActions />
+      {/* Col 2: GitHub + Quick Access */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
+        <GitHubActivity style={{ flex: "0 0 auto" }} />
+        <QuickActions style={{ flex: 1 }} />
       </div>
 
-      {/* Col 3 */}
-      <div className="flex flex-col gap-4">
-        <TaskChecklist />
-        <ActionInbox label="Capture" />
+      {/* Col 3: Tasks + Capture */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
+        <TaskChecklist style={{ flex: 1 }} />
+        <ActionInbox label="Capture" style={{ flex: "0 0 auto" }} />
       </div>
     </div>
   );

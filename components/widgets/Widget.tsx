@@ -1,34 +1,66 @@
-import { ReactNode } from "react";
+import { ReactNode, CSSProperties } from "react";
 
 interface WidgetProps {
   title: string;
   badge?: string | number;
-  badgeColor?: string;
-  children: ReactNode;
+  badgeColor?: "primary" | "green" | "yellow" | "red" | "purple";
   action?: { label: string; onClick: () => void };
-  className?: string;
+  children: ReactNode;
+  style?: CSSProperties;
 }
 
-export default function Widget({ title, badge, badgeColor = "#3b82f6", children, action, className = "" }: WidgetProps) {
+const BADGE: Record<string, { color: string; bg: string }> = {
+  primary: { color: "var(--primary)", bg: "var(--primary-bg)" },
+  green:   { color: "var(--green)",   bg: "var(--green-bg)"   },
+  yellow:  { color: "var(--yellow)",  bg: "var(--yellow-bg)"  },
+  red:     { color: "var(--red)",     bg: "var(--red-bg)"     },
+  purple:  { color: "var(--purple)",  bg: "var(--purple-bg)"  },
+};
+
+export default function Widget({ title, badge, badgeColor = "primary", action, children, style }: WidgetProps) {
+  const badge_style = BADGE[badgeColor];
+
   return (
-    <div
-      className={`flex flex-col rounded-lg overflow-hidden ${className}`}
-      style={{ background: "#111111", border: "1px solid #1e1e1e" }}
-    >
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      background: "var(--surface)",
+      border: "1px solid var(--border-subtle)",
+      borderRadius: "var(--radius)",
+      overflow: "hidden",
+      ...style,
+    }}>
+
       {/* Header */}
-      <div
-        className="flex items-center justify-between px-4 shrink-0"
-        style={{ height: 36, borderBottom: "1px solid #1a1a1a" }}
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium" style={{ color: "#888", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        height: 32,
+        padding: "0 12px",
+        borderBottom: "1px solid var(--border-subtle)",
+        flexShrink: 0,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <span style={{
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "var(--ink-3)",
+          }}>
             {title}
           </span>
           {badge !== undefined && (
-            <span
-              className="text-xs px-1.5 py-0.5 rounded"
-              style={{ background: `${badgeColor}22`, color: badgeColor, fontFamily: "monospace", fontSize: 10 }}
-            >
+            <span style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              padding: "1px 5px",
+              borderRadius: "var(--radius-sm)",
+              color: badge_style.color,
+              background: badge_style.bg,
+              fontWeight: 500,
+            }}>
               {badge}
             </span>
           )}
@@ -36,10 +68,18 @@ export default function Widget({ title, badge, badgeColor = "#3b82f6", children,
         {action && (
           <button
             onClick={action.onClick}
-            className="text-xs transition-colors"
-            style={{ color: "#444" }}
-            onMouseOver={e => (e.currentTarget.style.color = "#888")}
-            onMouseOut={e => (e.currentTarget.style.color = "#444")}
+            className="interactive"
+            style={{
+              fontSize: 11,
+              color: "var(--ink-3)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "2px 4px",
+              borderRadius: "var(--radius-sm)",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = "var(--ink-2)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "var(--ink-3)")}
           >
             {action.label}
           </button>
@@ -47,7 +87,9 @@ export default function Widget({ title, badge, badgeColor = "#3b82f6", children,
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4">{children}</div>
+      <div style={{ flex: 1, overflowY: "auto", padding: 12 }}>
+        {children}
+      </div>
     </div>
   );
 }

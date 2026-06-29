@@ -1,86 +1,133 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useRef } from "react";
 import Widget from "./Widget";
+
+type Priority = "high" | "mid" | "low";
 
 interface Task {
   id: string;
   text: string;
   done: boolean;
-  priority: "high" | "mid" | "low";
+  priority: Priority;
 }
+
+const PRIORITY: Record<Priority, string> = {
+  high: "var(--red)",
+  mid:  "var(--yellow)",
+  low:  "var(--ink-3)",
+};
 
 const INIT: Task[] = [
   { id: "1", text: "Finish PiOS setup", done: false, priority: "high" },
   { id: "2", text: "Push first commit", done: false, priority: "high" },
 ];
 
-const P_COLOR = { high: "#ef4444", mid: "#eab308", low: "#555" };
-
-export default function TaskChecklist() {
+export default function TaskChecklist({ style }: { style?: React.CSSProperties }) {
   const [tasks, setTasks] = useState<Task[]>(INIT);
   const [input, setInput] = useState("");
-  const [priority, setPriority] = useState<Task["priority"]>("mid");
+  const [priority, setPriority] = useState<Priority>("mid");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const add = () => {
     if (!input.trim()) return;
-    setTasks(t => [...t, { id: Date.now().toString(), text: input, done: false, priority }]);
+    setTasks(t => [{ id: Date.now().toString(), text: input, done: false, priority }, ...t]);
     setInput("");
+    inputRef.current?.focus();
   };
 
   const toggle = (id: string) => setTasks(t => t.map(task => task.id === id ? { ...task, done: !task.done } : task));
-  const remove = (id: string) => setTasks(t => t.filter(task => task.id !== id));
+  const remove  = (id: string) => setTasks(t => t.filter(task => task.id !== id));
 
   const open = tasks.filter(t => !t.done);
   const done = tasks.filter(t => t.done);
 
   return (
-    <Widget title="Tasks" badge={open.length} badgeColor="#ef4444">
-      <div className="flex flex-col gap-1">
+    <Widget title="Tasks" badge={open.length} badgeColor="red" style={style}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+
         {open.map(t => (
-          <div key={t.id} className="flex items-center gap-2 py-1.5 group">
-            <button onClick={() => toggle(t.id)} className="shrink-0 w-4 h-4 rounded border flex items-center justify-center" style={{ borderColor: "#2a2a2a", background: "transparent" }}>
-              <div className="w-2 h-2 rounded-sm" style={{ background: P_COLOR[t.priority] }} />
+          <div
+            key={t.id}
+            className="interactive"
+            style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 4px", borderRadius: "var(--radius-sm)" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-raised)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+          >
+            <button onClick={() => toggle(t.id)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, flexShrink: 0 }}>
+              <div style={{
+                width: 14,
+                height: 14,
+                borderRadius: "var(--radius-sm)",
+                border: `1px solid ${PRIORITY[t.priority]}`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }} />
             </button>
-            <span className="text-sm flex-1" style={{ color: "#ccc" }}>{t.text}</span>
-            <button onClick={() => remove(t.id)} className="text-xs opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "#444" }}>✕</button>
+            <span style={{ flex: 1, fontSize: 12, color: "var(--ink)", lineHeight: 1.4 }}>{t.text}</span>
+            <button
+              onClick={() => remove(t.id)}
+              className="interactive"
+              style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-3)", fontSize: 11, opacity: 0, flexShrink: 0 }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
+              onMouseLeave={e => (e.currentTarget.style.opacity = "0")}
+            >✕</button>
           </div>
         ))}
 
         {done.length > 0 && (
           <>
-            <div className="my-2" style={{ borderTop: "1px solid #1a1a1a" }} />
+            <div style={{ borderTop: "1px solid var(--border-subtle)", margin: "6px 0" }} />
             {done.map(t => (
-              <div key={t.id} className="flex items-center gap-2 py-1 group">
-                <button onClick={() => toggle(t.id)} className="shrink-0 w-4 h-4 rounded border flex items-center justify-center" style={{ borderColor: "#222", background: "#1a1a1a" }}>
-                  <span style={{ color: "#444", fontSize: 10 }}>✓</span>
+              <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 4px" }}>
+                <button onClick={() => toggle(t.id)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, flexShrink: 0 }}>
+                  <div style={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: "var(--radius-sm)",
+                    background: "var(--surface-raised)",
+                    border: "1px solid var(--border)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}>
+                    <span style={{ fontSize: 8, color: "var(--ink-3)" }}>✓</span>
+                  </div>
                 </button>
-                <span className="text-sm flex-1 line-through" style={{ color: "#333" }}>{t.text}</span>
-                <button onClick={() => remove(t.id)} className="text-xs opacity-0 group-hover:opacity-100" style={{ color: "#333" }}>✕</button>
+                <span style={{ flex: 1, fontSize: 12, color: "var(--ink-3)", textDecoration: "line-through" }}>{t.text}</span>
               </div>
             ))}
           </>
         )}
 
-        {/* Input */}
-        <div className="flex items-center gap-2 mt-3 pt-3" style={{ borderTop: "1px solid #1a1a1a" }}>
-          <div className="flex gap-1">
-            {(["high", "mid", "low"] as Task["priority"][]).map(p => (
+        {/* Input row */}
+        <div style={{ borderTop: "1px solid var(--border-subtle)", marginTop: 8, paddingTop: 8, display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", gap: 5, alignItems: "center", flexShrink: 0 }}>
+            {(["high", "mid", "low"] as Priority[]).map(p => (
               <button
                 key={p}
                 onClick={() => setPriority(p)}
-                className="w-3 h-3 rounded-full transition-all"
-                style={{ background: P_COLOR[p], opacity: priority === p ? 1 : 0.25 }}
+                className="interactive"
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  border: "none",
+                  cursor: "pointer",
+                  background: PRIORITY[p],
+                  opacity: priority === p ? 1 : 0.25,
+                }}
               />
             ))}
           </div>
           <input
-            placeholder="Add task..."
+            ref={inputRef}
+            placeholder="Add task…"
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && add()}
-            className="flex-1 text-sm bg-transparent outline-none"
-            style={{ color: "#aaa" }}
+            style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: 12, color: "var(--ink-2)" }}
           />
         </div>
       </div>

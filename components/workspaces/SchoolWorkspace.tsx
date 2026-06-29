@@ -5,15 +5,18 @@ import TaskChecklist from "@/components/widgets/TaskChecklist";
 
 export default function SchoolWorkspace() {
   return (
-    <div className="h-full p-4 grid gap-4" style={{
+    <div style={{
+      display: "grid",
       gridTemplateColumns: "1fr 1fr 1fr",
-      gridTemplateRows: "1fr",
+      gap: 10,
+      padding: 10,
+      height: "100%",
     }}>
-      <Assignments />
-      <CollegeTracker />
-      <div className="flex flex-col gap-4">
-        <TaskChecklist />
-        <ActionInbox label="School Inbox" />
+      <Assignments style={{ height: "100%" }} />
+      <CollegeTracker style={{ height: "100%" }} />
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
+        <TaskChecklist style={{ flex: 1 }} />
+        <ActionInbox label="School Inbox" style={{ flex: "0 0 auto" }} />
       </div>
     </div>
   );
