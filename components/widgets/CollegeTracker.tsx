@@ -16,7 +16,7 @@ interface College {
   tier: Tier;
   status: AppStatus;
   deadline: string;
-  portalUrl: string;
+  supplementalUrl: string;
   notes: string;
   essaysTotal: number;
   essaysDone: number;
@@ -42,7 +42,11 @@ const DEFAULT_REQS: Requirement[] = [
   { label: "Test Scores", done: false },
 ];
 
+const COMMON_APP_URL = "https://www.commonapp.org/apply/dashboard";
+const STORAGE_KEY = "pios-college-tracker";
+const ESSAY_KEY = "pios-personal-essay-url";
 const MAC_RELAY = "http://192.168.0.138:9876/open";
+
 async function openOnMac(url: string) {
   try { await fetch(MAC_RELAY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) }); }
   catch { window.open(url, "_blank"); }
@@ -60,21 +64,34 @@ function DeadlineBadge({ deadline }: { deadline: string }) {
   return <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color, flexShrink: 0 }}>{days < 0 ? "passed" : days === 0 ? "today" : `${days}d`}</span>;
 }
 
-const STORAGE_KEY = "pios-college-tracker";
-const BLANK = { name: "", type: "RD" as AppType, tier: "reach" as Tier, deadline: "", portalUrl: "", essaysTotal: 1 };
+function OpenBtn({ label, url, dim }: { label: string; url: string; dim?: boolean }) {
+  return (
+    <button onClick={() => openOnMac(url)}
+      style={{ fontSize: 11, padding: "3px 9px", borderRadius: "var(--radius)", background: dim ? "transparent" : "var(--primary-bg)", color: dim ? "var(--ink-3)" : "var(--primary)", border: `1px solid ${dim ? "var(--border)" : "var(--primary)"}`, cursor: "pointer", whiteSpace: "nowrap" }}>
+      {label}
+    </button>
+  );
+}
+
+const BLANK = { name: "", type: "RD" as AppType, tier: "reach" as Tier, deadline: "", supplementalUrl: "", essaysTotal: 1 };
 
 export default function CollegeTracker({ style }: { style?: React.CSSProperties }) {
   const [colleges, setColleges] = useState<College[]>([]);
+  const [personalEssayUrl, setPersonalEssayUrl] = useState("");
+  const [editingEssayUrl, setEditingEssayUrl] = useState(false);
+  const [essayInput, setEssayInput] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState(BLANK);
 
   useEffect(() => {
     try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) setColleges(JSON.parse(raw)); } catch {}
+    try { const url = localStorage.getItem(ESSAY_KEY); if (url) setPersonalEssayUrl(url); } catch {}
   }, []);
 
   const persist = (next: College[]) => { setColleges(next); localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); };
   const update = (id: string, patch: Partial<College>) => persist(colleges.map(c => c.id === id ? { ...c, ...patch } : c));
+
   const cycleStatus = (id: string) => {
     const c = colleges.find(x => x.id === id)!;
     update(id, { status: STATUS_ORDER[(STATUS_ORDER.indexOf(c.status) + 1) % STATUS_ORDER.length] });
@@ -85,10 +102,16 @@ export default function CollegeTracker({ style }: { style?: React.CSSProperties 
   };
   const add = () => {
     if (!form.name.trim()) return;
-    persist([...colleges, { id: Date.now().toString(), name: form.name.trim(), type: form.type, tier: form.tier, status: "researching", deadline: form.deadline, portalUrl: form.portalUrl.trim(), notes: "", essaysTotal: form.essaysTotal, essaysDone: 0, requirements: DEFAULT_REQS.map(r => ({ ...r })) }]);
+    persist([...colleges, { id: Date.now().toString(), name: form.name.trim(), type: form.type, tier: form.tier, status: "researching", deadline: form.deadline, supplementalUrl: form.supplementalUrl.trim(), notes: "", essaysTotal: form.essaysTotal, essaysDone: 0, requirements: DEFAULT_REQS.map(r => ({ ...r })) }]);
     setForm(BLANK); setAdding(false);
   };
   const remove = (id: string) => { persist(colleges.filter(c => c.id !== id)); if (expanded === id) setExpanded(null); };
+
+  const saveEssayUrl = () => {
+    setPersonalEssayUrl(essayInput.trim());
+    localStorage.setItem(ESSAY_KEY, essayInput.trim());
+    setEditingEssayUrl(false);
+  };
 
   const submitted = colleges.filter(c => ["submitted","accepted","rejected","deferred","waitlisted"].includes(c.status)).length;
 
@@ -96,6 +119,23 @@ export default function CollegeTracker({ style }: { style?: React.CSSProperties 
     <Widget title="College Apps" badge={`${submitted}/${colleges.length}`} badgeColor="purple" action={{ label: "+ add", onClick: () => setAdding(v => !v) }} style={style}>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
 
+        {/* Personal essay URL setup */}
+        {!personalEssayUrl || editingEssayUrl ? (
+          <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4, padding: "6px 8px", background: "var(--surface-raised)", borderRadius: "var(--radius)", border: "1px solid var(--border-subtle)" }}>
+            <span style={{ fontSize: 10, color: "var(--ink-3)", whiteSpace: "nowrap" }}>Personal essay:</span>
+            <input
+              autoFocus={editingEssayUrl}
+              placeholder="Drive URL…"
+              defaultValue={personalEssayUrl}
+              onChange={e => setEssayInput(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && saveEssayUrl()}
+              style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: 11, color: "var(--ink-2)" }}
+            />
+            <button onClick={saveEssayUrl} style={{ fontSize: 10, padding: "2px 7px", borderRadius: "var(--radius-sm)", background: "var(--primary-bg)", color: "var(--primary)", border: "1px solid var(--primary)", cursor: "pointer" }}>Save</button>
+          </div>
+        ) : null}
+
+        {/* Add form */}
         {adding && (
           <div style={{ marginBottom: 6, padding: 10, background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius)", display: "flex", flexDirection: "column", gap: 8 }}>
             <input autoFocus placeholder="College name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onKeyDown={e => e.key === "Enter" && add()}
@@ -118,7 +158,7 @@ export default function CollegeTracker({ style }: { style?: React.CSSProperties 
             </div>
             <input type="date" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
               style={{ background: "none", border: "none", outline: "none", fontSize: 11, color: "var(--ink-2)", colorScheme: "dark" }} />
-            <input placeholder="Portal URL (optional)" value={form.portalUrl} onChange={e => setForm(f => ({ ...f, portalUrl: e.target.value }))}
+            <input placeholder="Supplemental essays URL (optional)" value={form.supplementalUrl} onChange={e => setForm(f => ({ ...f, supplementalUrl: e.target.value }))}
               style={{ background: "none", border: "none", outline: "none", fontSize: 11, color: "var(--ink-2)" }} />
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: 11, color: "var(--ink-3)" }}>Essays:</span>
@@ -132,6 +172,7 @@ export default function CollegeTracker({ style }: { style?: React.CSSProperties 
           </div>
         )}
 
+        {/* College rows */}
         {colleges.map(c => {
           const st = STATUS_STYLE[c.status];
           const isOpen = expanded === c.id;
@@ -155,6 +196,8 @@ export default function CollegeTracker({ style }: { style?: React.CSSProperties 
 
               {isOpen && (
                 <div style={{ padding: "8px 10px 10px", background: "var(--surface-raised)", borderTop: "1px solid var(--border-subtle)", display: "flex", flexDirection: "column", gap: 10 }}>
+
+                  {/* Progress bars */}
                   <div style={{ display: "flex", gap: 12 }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
@@ -180,6 +223,7 @@ export default function CollegeTracker({ style }: { style?: React.CSSProperties 
                     </div>
                   </div>
 
+                  {/* Requirements chips */}
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {c.requirements.map((r, i) => (
                       <button key={i} onClick={() => toggleReq(c.id, i)}
@@ -189,18 +233,24 @@ export default function CollegeTracker({ style }: { style?: React.CSSProperties 
                     ))}
                   </div>
 
+                  {/* Notes */}
                   <textarea placeholder="Notes…" value={c.notes} onChange={e => update(c.id, { notes: e.target.value })}
                     style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-sm)", color: "var(--ink-2)", fontSize: 11, padding: "6px 8px", resize: "none", height: 52, outline: "none", fontFamily: "inherit", lineHeight: 1.5 }} />
 
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    {c.portalUrl ? (
-                      <button onClick={() => openOnMac(c.portalUrl)} style={{ fontSize: 11, padding: "3px 10px", borderRadius: "var(--radius)", background: "var(--primary-bg)", color: "var(--primary)", border: "1px solid var(--primary)", cursor: "pointer" }}>Open Portal</button>
-                    ) : (
-                      <input placeholder="Portal URL" onBlur={e => update(c.id, { portalUrl: e.target.value.trim() })}
-                        style={{ background: "none", border: "none", borderBottom: "1px solid var(--border-subtle)", outline: "none", fontSize: 11, color: "var(--ink-3)", width: 140, paddingBottom: 2 }} />
-                    )}
-                    <button onClick={() => remove(c.id)} style={{ fontSize: 11, color: "var(--red)", background: "none", border: "none", cursor: "pointer", opacity: 0.6 }}
-                      onMouseEnter={e => (e.currentTarget.style.opacity = "1")} onMouseLeave={e => (e.currentTarget.style.opacity = "0.6")}>
+                  {/* Open buttons */}
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                    <OpenBtn label="Common App" url={COMMON_APP_URL} />
+                    {personalEssayUrl
+                      ? <OpenBtn label="Personal Essay" url={personalEssayUrl} />
+                      : <button onClick={() => setEditingEssayUrl(true)} style={{ fontSize: 11, padding: "3px 9px", borderRadius: "var(--radius)", background: "transparent", color: "var(--ink-3)", border: "1px solid var(--border)", cursor: "pointer" }}>Set Essay URL</button>
+                    }
+                    {c.supplementalUrl
+                      ? <OpenBtn label="Supplemental" url={c.supplementalUrl} dim />
+                      : <input placeholder="Supplemental URL" onBlur={e => update(c.id, { supplementalUrl: e.target.value.trim() })}
+                          style={{ background: "none", border: "none", borderBottom: "1px solid var(--border-subtle)", outline: "none", fontSize: 11, color: "var(--ink-3)", width: 130, paddingBottom: 2 }} />
+                    }
+                    <button onClick={() => remove(c.id)} style={{ marginLeft: "auto", fontSize: 11, color: "var(--red)", background: "none", border: "none", cursor: "pointer", opacity: 0.5 }}
+                      onMouseEnter={e => (e.currentTarget.style.opacity = "1")} onMouseLeave={e => (e.currentTarget.style.opacity = "0.5")}>
                       Remove
                     </button>
                   </div>
