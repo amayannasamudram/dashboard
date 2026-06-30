@@ -3,6 +3,7 @@ import CollegeTracker from "@/components/widgets/CollegeTracker";
 import ActionInbox from "@/components/widgets/ActionInbox";
 import TaskChecklist from "@/components/widgets/TaskChecklist";
 import Grades from "@/components/widgets/Grades";
+import Calendar from "@/components/widgets/Calendar";
 
 export default function SchoolWorkspace() {
   return (
@@ -21,6 +22,7 @@ export default function SchoolWorkspace() {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
+        <Calendar style={{ flex: "0 0 auto" }} />
         <TaskChecklist style={{ flex: 1 }} />
         <ActionInbox label="School Inbox" style={{ flex: "0 0 auto" }} />
       </div>
