@@ -3,6 +3,21 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Widget from "./Widget";
 
+const MAC_RELAY = "http://192.168.0.138:9876/open";
+
+async function openOnMac(url: string) {
+  try {
+    await fetch(MAC_RELAY, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
+  } catch {
+    // Relay offline — fall back to opening locally
+    window.open(url, "_blank");
+  }
+}
+
 interface Doc {
   id: string;
   name: string;
@@ -246,10 +261,8 @@ export default function ProjectDocs({ style }: { style?: React.CSSProperties }) 
             onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-raised)")}
             onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
           >
-            <a
-              href={doc.url}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => openOnMac(doc.url)}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -257,7 +270,10 @@ export default function ProjectDocs({ style }: { style?: React.CSSProperties }) 
                 flex: 1,
                 padding: "7px 8px",
                 borderRadius: "var(--radius)",
-                textDecoration: "none",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                textAlign: "left",
                 minWidth: 0,
               }}
             >
@@ -277,7 +293,7 @@ export default function ProjectDocs({ style }: { style?: React.CSSProperties }) 
                   )}
                 </div>
               </div>
-            </a>
+            </button>
             <button
               onClick={() => remove(doc.id)}
               style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-3)", fontSize: 12, opacity: 0, flexShrink: 0, padding: "0 6px" }}
