@@ -6,6 +6,7 @@ import ActionInbox from "@/components/widgets/ActionInbox";
 import VercelDeploys from "@/components/widgets/VercelDeploys";
 import Weather from "@/components/widgets/Weather";
 import Spotify from "@/components/widgets/Spotify";
+import ProjectDocs from "@/components/widgets/ProjectDocs";
 
 export default function ProjectsWorkspace() {
   return (
@@ -29,9 +30,10 @@ export default function ProjectsWorkspace() {
         <VercelDeploys style={{ flex: 1 }} />
       </div>
 
-      {/* Col 3: Tasks + Quick Access + Capture */}
+      {/* Col 3: Tasks + Docs + Quick Access + Capture */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
         <TaskChecklist style={{ flex: 1 }} />
+        <ProjectDocs style={{ flex: 1 }} />
         <QuickActions style={{ flex: "0 0 auto" }} />
         <ActionInbox label="Capture" style={{ flex: "0 0 auto" }} />
       </div>
