@@ -7,12 +7,13 @@ import VercelDeploys from "@/components/widgets/VercelDeploys";
 import Weather from "@/components/widgets/Weather";
 import Spotify from "@/components/widgets/Spotify";
 import ProjectDocs from "@/components/widgets/ProjectDocs";
+import Calendar from "@/components/widgets/Calendar";
 
 export default function ProjectsWorkspace() {
   return (
     <div style={{
       display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr",
+      gridTemplateColumns: "1fr 1fr 1fr 1fr",
       gap: 10,
       padding: 10,
       height: "100%",
@@ -30,12 +31,17 @@ export default function ProjectsWorkspace() {
         <VercelDeploys style={{ flex: 1 }} />
       </div>
 
-      {/* Col 3: Tasks + Docs + Quick Access + Capture */}
+      {/* Col 3: Tasks + Docs */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
         <TaskChecklist style={{ flex: 1 }} />
         <ProjectDocs style={{ flex: 1 }} />
+      </div>
+
+      {/* Col 4: Calendar + Quick Actions + Capture */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
+        <Calendar style={{ flex: "0 0 auto" }} />
         <QuickActions style={{ flex: "0 0 auto" }} />
-        <ActionInbox label="Capture" style={{ flex: "0 0 auto" }} />
+        <ActionInbox label="Capture" style={{ flex: 1 }} />
       </div>
     </div>
   );

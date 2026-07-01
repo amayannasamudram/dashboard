@@ -9,22 +9,29 @@ export default function SchoolWorkspace() {
   return (
     <div style={{
       display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr",
+      gridTemplateColumns: "1fr 1fr 1fr 1fr",
       gap: 10,
       padding: 10,
       height: "100%",
     }}>
+      {/* Col 1: Assignments */}
       <Assignments style={{ height: "100%" }} />
 
+      {/* Col 2: Grades + College */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
         <Grades style={{ flex: 1 }} />
         <CollegeTracker style={{ flex: 1 }} />
       </div>
 
+      {/* Col 3: Calendar + Tasks */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
         <Calendar style={{ flex: "0 0 auto" }} />
         <TaskChecklist style={{ flex: 1 }} />
-        <ActionInbox label="School Inbox" style={{ flex: "0 0 auto" }} />
+      </div>
+
+      {/* Col 4: Inbox */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
+        <ActionInbox label="School Inbox" style={{ flex: 1 }} />
       </div>
     </div>
   );
